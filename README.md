@@ -1,5 +1,4 @@
 # Multi_ASR
-# Multi_ASR
 A unified ASR system supporting low-resource and high-resource languages.
 Currently optimized for Khowar and Pashto, with a roadmap toward 50+ languages.
 
