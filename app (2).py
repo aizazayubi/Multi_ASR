@@ -4,13 +4,13 @@ from transformers import pipeline
 # ----------------- LOAD MODELS -----------------
 pashto_asr = pipeline(
     "automatic-speech-recognition",
-    model="Aizazayyubi/pashto-whisper-asr",
+    model="https://huggingface.co/models/Aizazayyubi/pashto-whisper-asr",
     device=-1
 )
 
 khowar_asr = pipeline(
     "automatic-speech-recognition",
-    model="Aizazayyubi/khowar-whisper-asr",
+    model="https://huggingface.co/models/Aizazayyubi/khowar-whisper-asr",
     device=-1
 )
 
