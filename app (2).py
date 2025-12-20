@@ -2,12 +2,13 @@ import gradio as gr
 from transformers import pipeline
 
 # ----------------- LOAD MODELS -----------------
+# Pashto Model
 pashto_asr = pipeline(
     "automatic-speech-recognition",
     model="https://huggingface.co/models/Aizazayyubi/pashto-whisper-asr",
     device=-1
 )
-
+# Khowar Model
 khowar_asr = pipeline(
     "automatic-speech-recognition",
     model="https://huggingface.co/models/Aizazayyubi/khowar-whisper-asr",
