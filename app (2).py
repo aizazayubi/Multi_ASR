@@ -2,130 +2,138 @@ import gradio as gr
 from transformers import pipeline
 
 # ----------------- LOAD MODELS -----------------
-# Pashto Model
 pashto_asr = pipeline(
     "automatic-speech-recognition",
-    model="https://huggingface.co/models/Aizazayyubi/pashto-whisper-asr",
+    model="Aizazayyubi/pashto-whisper-asr",
     device=-1
 )
-# Khowar Model
+
 khowar_asr = pipeline(
     "automatic-speech-recognition",
-    model="https://huggingface.co/models/Aizazayyubi/khowar-whisper-asr",
+    model="Aizazayyubi/khowar-whisper-asr",
     device=-1
 )
-# Trascribtion
-def transcribe(audio, lang_choice):
+
+# ----------------- TRANSCRIPTION -----------------
+def transcribe(audio, lang):
     if audio is None:
-        return "No audio provided"
+        return "❌ No audio provided."
 
-    if lang_choice == "Pashto":
+    if lang == "Pashto":
         return pashto_asr(audio)["text"]
-    else:
-        return khowar_asr(audio)["text"]
+    return khowar_asr(audio)["text"]
 
-# ----------------- CSS -----------------
+# ----------------- CUSTOM CSS -----------------
 custom_css = """
-body, .gradio-container { background: #f2f4f7 !important; }
+body, .gradio-container {
+    background: linear-gradient(135deg, #eef2f7, #f9fafb) !important;
+}
 
-/* Card */
-.card {
+.app-card {
     background: white;
-    padding: 25px;
+    padding: 28px;
+    border-radius: 22px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+}
+
+.header {
+    text-align: center;
+    padding: 28px;
+    background: #000;
+    color: white;
     border-radius: 18px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-    margin-bottom: 18px;
-}
-
-/* Header - SOLID BLACK */
-.header-title {
-    text-align: center;
-    font-size: 36px;
-    font-weight: 800;
-    color: white;
-    padding: 20px;
-    background: #000;
-    border-radius: 12px;
-    margin-bottom: 4px;
-}
-
-.header-sub {
-    text-align: center;
-    font-size: 18px;
-    color: white;
-    padding: 10px;
-    background: #000;
-    border-radius: 8px;
     margin-bottom: 25px;
 }
 
-/* Developer Section - SOLID BLACK */
+.header h1 {
+    font-size: 38px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.header p {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.lang-badge {
+    background: #000;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
 .dev-box {
     text-align: center;
     background: #000;
-    padding: 22px;
-    border-radius: 16px;
-    margin-top: 25px;
+    padding: 24px;
+    border-radius: 18px;
+    margin-top: 30px;
     color: white;
 }
 
-.dev-title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: white;
-}
-
-.dev-text {
-    font-size: 15px;
-    opacity: 0.95;
-    color: white;
-}
-
-footer { visibility: hidden !important; }
+footer { display: none !important; }
 """
 
-# ----------------- User Interface -----------------
-with gr.Blocks() as iface:
+# ----------------- UI -----------------
+with gr.Blocks(css=custom_css, theme=gr.themes.Soft()) as iface:
 
-    gr.HTML(f"<style>{custom_css}</style>")
-
+    # Header
     gr.HTML("""
-    <h1 class='header-title'>Multilingual Speech-to-Text</h1>
-    <p class='header-sub'>Pashto & Khowar | Whisper-Based ASR</p>
+    <div class="header">
+        <h1>Multilingual Speech-to-Text</h1>
+        <p>Whisper-based ASR for Pashto & Khowar</p>
+    </div>
     """)
 
-    with gr.Row(elem_classes="card"):
-        with gr.Column():
-            lang_choice = gr.Radio(
+    with gr.Row():
+        with gr.Column(scale=1, elem_classes="app-card"):
+            gr.Markdown("### 🌐 Language Selection")
+            lang = gr.Radio(
                 ["Pashto", "Khowar"],
                 value="Pashto",
-                label="Select Language"
+                interactive=True
             )
 
-            audio_in = gr.Audio(
-                sources=["microphone", "upload"],
-                type="filepath",
-                label="🎤 Upload or Record Audio"
-            )
+            gr.Markdown("### 🎧 Audio Input")
+            with gr.Tabs():
+                with gr.Tab("🎙️ Record"):
+                    audio = gr.Audio(
+                        sources=["microphone"],
+                        type="filepath"
+                    )
+                with gr.Tab("📁 Upload"):
+                    audio = gr.Audio(
+                        sources=["upload"],
+                        type="filepath"
+                    )
 
-            btn = gr.Button("Transcribe")
+            transcribe_btn = gr.Button("🚀 Transcribe", variant="primary")
 
-        with gr.Column():
+        with gr.Column(scale=1, elem_classes="app-card"):
+            gr.Markdown("### 📝 Transcription Output")
             output = gr.Textbox(
-                label="Transcription Output",
-                lines=10
+                lines=12,
+                placeholder="Your transcription will appear here..."
             )
 
-    btn.click(transcribe, [audio_in, lang_choice], output)
+            with gr.Row():
+                gr.Button("📋 Copy", onclick="navigator.clipboard.writeText(document.querySelector('textarea').value)")
+                gr.Button("🧹 Clear", onclick="document.querySelector('textarea').value=''")
+
+    transcribe_btn.click(
+        fn=transcribe,
+        inputs=[audio, lang],
+        outputs=output
+    )
 
     # Developer Section
     gr.HTML("""
     <div class="dev-box">
-        <div class="dev-title">Developed by The Speech Rangers</div>
-        <div class="dev-text">
-            Building speech technology for Pakistan’s low-resource languages.
-        </div>
+        <h3>Developed by The Speech Rangers</h3>
+        <p>Empowering Pakistan’s low-resource languages with AI-driven speech technology.</p>
     </div>
     """)
 
