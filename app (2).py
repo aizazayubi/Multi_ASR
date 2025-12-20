@@ -14,7 +14,7 @@ khowar_asr = pipeline(
     model="https://huggingface.co/models/Aizazayyubi/khowar-whisper-asr",
     device=-1
 )
-
+# Trascribtion
 def transcribe(audio, lang_choice):
     if audio is None:
         return "No audio provided"
@@ -85,7 +85,7 @@ body, .gradio-container { background: #f2f4f7 !important; }
 footer { visibility: hidden !important; }
 """
 
-# ----------------- UI -----------------
+# ----------------- User Interface -----------------
 with gr.Blocks() as iface:
 
     gr.HTML(f"<style>{custom_css}</style>")
